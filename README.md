@@ -73,8 +73,8 @@ Semua aktivitas ini dicatat dalam tabel `shifts` untuk pelaporan dan kontrol ope
 ## 🚀 Instalasi
 1. Clone repositori ini  
    ```bash
-   git clone https://github.com/username/nama-proyek.git
-   cd nama-proyek
+   git clone https://github.com/dalvero/pos-inventaris.git
+   cd pos-inventaris
    ```
 
 2. Install dependencies  
