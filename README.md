@@ -16,21 +16,49 @@ Aplikasi ini ditujukan untuk membantu pemilik usaha minuman maupun makanan dalam
 
 ## 🧩 Fitur Utama
 
-### 👩‍💼 Role Management
-Terdapat dua role utama dalam sistem:
+## 👩‍💼 Role Management
+Terdapat beberapa role dalam sistem
+- **Super Admin (Pemilik Web)**
+    - Mengelola seluruh data pengguna dan toko.
+    - Melihat daftar semua toko yang terdaftar.
+    - Menghapus atau menonaktifkan toko.
+    - Mengawasi aktivitas secara global.
+
 - **Admin / Owner**
-  - Menambahkan dan mengelola produk serta bahan baku.
-  - Mengatur resep produk (komposisi bahan).
-  - Melihat laporan transaksi harian, mingguan, dan bulanan.
-  - Menerima notifikasi jika bahan baku habis atau produk tidak dapat dibuat.
+    - Mendaftarkan toko terlebih dahlu sebelum digunakan.
+    - Mengelola produk, bahan baku, dan resep pada tokonya.
+    - Mengundang atau membuat akun kasir.
+    - Melihat laporan transaksi, shift, dan stok khusus untuk tokonya.    
 
 - **Kasir / User**
-  - Melakukan transaksi penjualan.
-  - Sistem otomatis mengurangi stok bahan baku berdasarkan resep produk.
-  - Melihat total penjualan per shift (Opening - Closing).
-  - Melakukan pencatatan waktu **Opening**, **Break**, dan **Closing** sebagai tanda shift kasir.
+    - Melakukan transaksi penjualan.
+    - Sistem otomatis mengurangi stok bahan baku berdasarkan resep produk.
+    - Melihat total penjualan per shift (Opening - Closing).
+    - Melakukan pencatatan waktu **Opening**, **Break**, dan **Closing** sebagai tanda shift kasir.
 
 ---
+
+## 🔁 Alur Sistem (System Flow)
+- **👷‍♂️ Super Admin**
+    - Mengelola seluruh toko dan admin toko.
+    - Tidak melakukan transaksi - fokus pada monitoring.
+
+- **👨‍⚖️ Admin Toko**
+    - Register sebagai admin toko
+    - Login kemudian **mendaftarkan tokonya.**
+    - Menambahkan produk, bahan baku, dan resep.
+    - Mendaftarkan kasir atau kasir bisa register sendiri dengan memilih toko.
+    - Melihat laporan transaksi dan shift.
+
+- **👩‍💼 Kasir**
+    - Register dengan memilih **toko** tempat bekerja.
+    - Setelah akun aktif, kasir login dan melakukan :
+        - **Opening Shift**
+        - **Break**
+        - **Closing Shift**
+    - Melakukan transaksi penjualan.
+    - Stok otomatis berkurang berdasarkan resep produk.
+
 
 ## 🕒 Shift Management
 Sebelum kasir memulai transaksi, sistem akan meminta salah satu aksi berikut:
@@ -61,6 +89,7 @@ Semua aktivitas ini dicatat dalam tabel `shifts` untuk pelaporan dan kontrol ope
 | Tabel | Deskripsi |
 |-------|------------|
 | `users` | Menyimpan data user dan role (admin, kasir) |
+| `toko` | Menyimpan daftar toko yang didaftarkan admin toko |
 | `bahan_baku` | Menyimpan data bahan baku |
 | `produk` | Menyimpan data produk jual |
 | `resep_produk` | Relasi antara produk dan bahan baku |
@@ -104,3 +133,4 @@ Proyek ini dilisensikan di bawah [MIT License](LICENSE).
 ---
 
 © 2025 — Developed by Daniel Alvero
+***Project ini dibuat untuk UAS***

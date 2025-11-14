@@ -1,0 +1,30 @@
+[SHIFT FLOW]
+
+1. Kasir Login
+2. Klik Opening Shift
+3. Sistem membuat shift record
+4. → Kasir bisa melakukan transaksi
+5. Kasir selesai → Klik Closing Shift
+6. Sistem menutup shift dan menyimpan end_time
+
+[TRANSAKSI FLOW]
+
+1. Kasir pilih produk
+2. Kasir input jumlah
+3. Klik Bayar
+4. Sistem :
+    * Buat transaksi
+    * Buat item transaksi
+    * Kurangi stok bahan
+    * Log pemakaian bahan
+    * Rekap pendapatan shift
+5. Return struk (jika perlu)
+
+[INVENTORY FLOW]
+
+1. Admin buka halaman laporan
+2. Sistem hitung :
+    a. Pendapatan harian
+    b. Jumlah transaksi
+    c. Pemakaian bahan
+3. Tampilkan laporan lengkap
