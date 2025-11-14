@@ -15,11 +15,13 @@ class BahanBaku extends Model
 
     public function toko()
     {
-        return $this->belongsTo(Toko::class);
+        // RELASI KE TABEL TOKO -> ONE TO MANY LEWAT toko_id
+        return $this->belongsTo(Toko::class); 
     }
 
     public function resepProduks()
     {
-        return $this->hasMany(ResepProduk::class, 'bahan_id');
+        // RELASI KE TABEL RESEP PRODUK -> MANY TO ONE LEWAT bahan_id
+        return $this->hasMany(ResepProduk::class, 'bahan_id'); 
     }
 }

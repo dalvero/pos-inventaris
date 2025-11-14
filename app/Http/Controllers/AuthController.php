@@ -9,26 +9,31 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Tampilkan halaman login
+    // MENAMPILKAN HALAMAN LOGIN
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    // Login process
+    // PROSES LOGIN
     public function login(Request $request)
     {
+        // VALIDASI INPUT
         $credentials = $request->only('email','password');
 
+        // CEK KREDENSIAL DAN LOGIN
         if(Auth::attempt($credentials)){
             $request->session()->regenerate();
+
+            // JIKA BERHASIL LOGIN, MENAMPILKAN PESAN LOGIN BERHASIL
             return redirect()->route('dashboard')->with('success','Login berhasil!');
         }
 
+        // JIKA GAGAL KEMBALI KE HALAMAN LOGIN DENGAN ERROR
         return back()->withErrors(['email'=>'Email atau password salah']);
     }
 
-    // Logout
+    // LOGOUT
     public function logout(Request $request)
     {
         Auth::logout();
@@ -37,30 +42,35 @@ class AuthController extends Controller
         return redirect()->route('home');
     }
 
-    // Tampilkan halaman register
+    // MENAMPILKAN HALAMAN REGISTER
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    // Register process
+    // REGISTER PROSES
     public function register(Request $request)
     {
+        // VALIDASI INPUT
         $request->validate([
             'name'=>'required|string|max:255',
             'email'=>'required|string|email|max:255|unique:users',
             'password'=>'required|string|confirmed|min:6',
         ]);
 
+        // MEMBUAT USER BARU
         $user = User::create([
             'name'=>$request->name,
             'email'=>$request->email,
             'password'=>Hash::make($request->password),
-            'role'=>'kasir', // default role
+            'role'=>'kasir', // SET DEFAULT ROLE KASIR
+            'toko_id'=>null // NANTI UPDATE JIKA SUDAH ADA TOKO            
         ]);
 
+        // LOGIN OTOMATIS SETELAH REGISTER
         Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success','Akun berhasil dibuat!');
+        // REDIRECT KE DASHBOARD DENGAN PESAN SUKSES
+        return redirect()->route('dashboard')->with('success','Akun berhasil dibuat!'); 
     }
 }

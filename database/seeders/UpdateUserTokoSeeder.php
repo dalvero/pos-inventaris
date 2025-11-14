@@ -12,11 +12,11 @@ class UpdateUserTokoSeeder extends Seeder
     {
         $toko = Toko::first();
 
-        // Update Admin Toko
+        // UPDATE ADMIN TOKO
         $adminToko = User::where('role', 'admin_toko')->first();
         $adminToko->update(['toko_id' => $toko->id]);
 
-        // Update Kasir
+        // UPDATE KASIR
         $kasir = User::where('role', 'kasir')->first();
         $kasir->update(['toko_id' => $toko->id]);
     }

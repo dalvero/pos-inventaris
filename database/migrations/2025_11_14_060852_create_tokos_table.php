@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('nama_toko');
             $table->string('alamat')->nullable();
             $table->string('telepon')->nullable();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Admin toko
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // ADMIN TOKO
             $table->timestamps();
         });
     }

@@ -15,11 +15,13 @@ class DetailTransaksi extends Model
 
     public function transaksi()
     {
-        return $this->belongsTo(Transaksi::class);
+        // RELASI KE TABEL TRANSAKSI -> ONE TO MANY LEWAT transaksi_id
+        return $this->belongsTo(Transaksi::class); 
     }
 
     public function produk()
     {
+        // RELASI KE TABEL PRODUK -> ONE TO MANY LEWAT produk_id
         return $this->belongsTo(Produk::class);
     }
 }

@@ -11,7 +11,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Super Admin
+        // SUPER ADMIN
         User::create([
             'name' => 'Super Admin',
             'email' => 'superadmin@pos.com',
@@ -20,13 +20,13 @@ class UserSeeder extends Seeder
             'toko_id' => null
         ]);
 
-        // Admin Toko
+        // ADMIN TOKO
         User::create([
             'name' => 'Admin Toko 1',
             'email' => 'admintoko1@pos.com',
             'password' => Hash::make('password123'),
             'role' => 'admin_toko',
-            'toko_id' => null // nanti update setelah toko dibuat
+            'toko_id' => null // NANTI UPDATE SETELAH TOKO DIBUAT
         ]);
 
         // Kasir sample
@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
             'email' => 'kasir1@pos.com',
             'password' => Hash::make('password123'),
             'role' => 'kasir',
-            'toko_id' => null // nanti update
+            'toko_id' => null // NANTI UPDATE
         ]);
     }
 }

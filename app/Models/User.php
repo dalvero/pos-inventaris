@@ -17,22 +17,22 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
-
-    // RELASI KE TOKO (OPTIONAL UNTUK KASIR/SUPER ADMIN)
+    
     public function toko()
     {
+        // RELASI KE TABEL TOKO -> ONE TO MANY LEWAT toko_id
         return $this->belongsTo(Toko::class);
     }
-
-    // RELASI KE TRANSAKSI (JIKA ROLE KASIR)
+    
     public function transaksis()
     {
+        // RELASI KE TABEL TRANSAKSI -> ONE TO MANY LEWAT user_id (kasir_id)
         return $this->hasMany(Transaksi::class, 'kasir_id');
     }
-
-    // RELASI KE SHIFT
+    
     public function shifts()
     {
+        // RELASI KE TABEL SHIFT -> ONE TO MANY LEWAT user_id (kasir_id)
         return $this->hasMany(Shift::class, 'kasir_id');
     }
 }

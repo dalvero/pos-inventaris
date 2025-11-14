@@ -12,36 +12,40 @@ class Toko extends Model
     protected $fillable = [
         'nama_toko', 'alamat', 'telepon', 'user_id'
     ];
-
-    // RELASI KE ADMIN TOKO
+    
     public function admin()
     {
+        // RELASI KE TABEL USER (ROLE ADMIN TOKO) -> ONE TO MANY LEWAT user_id
         return $this->belongsTo(User::class, 'user_id');
     }
-
-    // RELASI KE KASIR
+    
     public function kasirs()
     {
+        // RELASI KE TABEL USER (ROLE KASIR) -> ONE TO MANY LEWAT user_id
         return $this->hasMany(User::class)->where('role', 'kasir');
     }
 
     public function produks()
     {
+        // RELASI KE TABEL PRODUK -> ONE TO MANY LEWAT toko_id
         return $this->hasMany(Produk::class);
     }
 
     public function bahanBakus()
     {
+        // RELASI KE TABEL BAHAN BAKU -> ONE TO MANY LEWAT toko_id
         return $this->hasMany(BahanBaku::class);
     }
 
     public function transaksis()
     {
+        // RELASI KE TABEL TRANSAKSI -> ONE TO MANY LEWAT toko_id
         return $this->hasMany(Transaksi::class);
     }
 
     public function shifts()
     {
+        // RELASI KE TABEL SHIFT -> ONE TO MANY LEWAT toko_id
         return $this->hasMany(Shift::class);
     }
 }

@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('produk_id')->constrained('produks')->onDelete('cascade');
             $table->foreignId('bahan_id')->constrained('bahan_bakus')->onDelete('cascade');
-            $table->integer('jumlah'); // jumlah bahan yang dipakai
+            $table->integer('jumlah'); // JUMLAH BAHAN YANG DIPAKAI
             $table->timestamps();
         });
     }

@@ -15,16 +15,19 @@ class Produk extends Model
 
     public function toko()
     {
+        // RELASI KE TABEL TOKO -> ONE TO MANY LEWAT toko_id
         return $this->belongsTo(Toko::class);
     }
 
     public function resepProduks()
     {
+        // RELASI KE TABEL RESEP PRODUK -> MANY TO ONE LEWAT produk_id
         return $this->hasMany(ResepProduk::class);
     }
 
     public function detailTransaksis()
     {
+        // RELASI KE TABEL DETAIL TRANSAKSI -> MANY TO ONE LEWAT produk_id
         return $this->hasMany(DetailTransaksi::class);
     }
 }

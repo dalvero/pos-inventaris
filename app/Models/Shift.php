@@ -15,11 +15,13 @@ class Shift extends Model
 
     public function kasir()
     {
+        // RELASI KE TABEL USER (ROLE KASIR) -> ONE TO MANY LEWAT user_id (kasir_id)
         return $this->belongsTo(User::class, 'kasir_id');
     }
 
     public function toko()
     {
+        // RELASI KE TABEL TOKO -> ONE TO MANY LEWAT toko_id
         return $this->belongsTo(Toko::class);
     }
 }

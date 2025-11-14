@@ -15,16 +15,19 @@ class Transaksi extends Model
 
     public function toko()
     {
+        // RELASI KE TABEL TOKO -> ONE TO MANY LEWAT toko_id
         return $this->belongsTo(Toko::class);
     }
 
     public function kasir()
     {
+        // RELASI KE TABEL USER (ROLE KASIR) -> ONE TO MANY LEWAT user_id (kasir_id)
         return $this->belongsTo(User::class, 'kasir_id');
     }
 
     public function detailTransaksis()
     {
+        // RELASI KE TABEL DETAIL TRANSAKSI -> MANY TO ONE LEWAT transaksi_id
         return $this->hasMany(DetailTransaksi::class);
     }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('toko_id')->constrained('tokos')->onDelete('cascade');
             $table->string('nama_bahan');
             $table->integer('stok')->default(0);
-            $table->string('satuan'); // gram, ml, pcs
+            $table->string('satuan'); // GRAN, ML, PCS
             $table->integer('minimum_stok')->default(0);
             $table->timestamps();
         });

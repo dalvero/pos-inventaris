@@ -8,12 +8,15 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleMiddleware
 {
+    // MEMERIKSA ROLE USER
     public function handle(Request $request, Closure $next, ...$roles)
     {
+        // CEK JIKA USER SUDAH LOGIN
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
+        // CEK ROLE USER, JIKA TIDAK SESUAI MAKA ABORT 403
         $user = Auth::user();
         if (!in_array($user->role, $roles)) {
             abort(403, 'Unauthorized');
@@ -21,10 +24,4 @@ class RoleMiddleware
 
         return $next($request);
     }
-
-    protected $routeMiddleware = [
-        // ...
-        'role' => \App\Http\Middleware\RoleMiddleware::class,
-    ];
-
 }

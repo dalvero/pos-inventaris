@@ -43,9 +43,9 @@ Route::middleware('auth')->group(function () {
     // ---------------------------
     // Admin Toko / Super Admin: Daftarkan Kasir
     // ---------------------------
-    Route::middleware('role:admin_toko,super_admin')->group(function () {
-        Route::get('/kasir/create', [KasirController::class,'create'])->name('kasir.create');
-        Route::post('/kasir/store', [KasirController::class,'store'])->name('kasir.store');
+    Route::middleware(['auth', 'role:admin_toko,super_admin'])->group(function () {
+        Route::get('/kasir/create', [KasirController::class, 'create'])->name('kasir.create');
+        Route::post('/kasir/store', [KasirController::class, 'store'])->name('kasir.store');
     });
 
 });
