@@ -16,7 +16,7 @@ class Kernel extends HttpKernel
         // middleware default Laravel
         'auth' => \App\Http\Middleware\Authenticate::class,
         // middleware custom role
-        'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'role' => \App\Http\Middleware\RoleMiddleware::class, 
     ];
 
 }

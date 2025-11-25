@@ -18,7 +18,7 @@
                 <a href="{{ route('dashboard') }}" class="hover:text-accent">Dashboard</a>
                 <form action="{{ route('logout') }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="hover:text-accent">Logout</button>
+                    <button type="submit" class="hover:text-accent">Logout</button> 
                 </form>
             @else
                 <a href="{{ route('login') }}" class="hover:text-accent">Login</a>

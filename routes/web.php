@@ -7,16 +7,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TokoController;
 use App\Http\Controllers\KasirController;
 
-// ---------------------------
-// Landing Page
-// ---------------------------
+// LANDING PAGE
 Route::get('/', [HomeController::class,'index'])->name('home');
 Route::get('/about', [HomeController::class,'about'])->name('about');
 Route::get('/contact', [HomeController::class,'contact'])->name('contact');
 
-// ---------------------------
-// Auth Routes
-// ---------------------------
+// AUTH ROUTE
 Route::get('/login', [AuthController::class,'showLogin'])->name('login');
 Route::post('/login', [AuthController::class,'login']);
 Route::post('/logout', [AuthController::class,'logout'])->name('logout');
@@ -24,26 +20,22 @@ Route::post('/logout', [AuthController::class,'logout'])->name('logout');
 Route::get('/register', [AuthController::class,'showRegister'])->name('register');
 Route::post('/register', [AuthController::class,'register']);
 
-// ---------------------------
-// Routes untuk user yang sudah login
-// ---------------------------
+// USER HARUS LOGIN
 Route::middleware('auth')->group(function () {
 
-    // Dashboard sesuai role
+    // DASHBOARD
     Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
 
-    // ---------------------------
-    // Admin Toko: Daftarkan Toko
-    // ---------------------------
+    // ADMIN TOKO SAJA
     Route::middleware('role:admin_toko')->group(function () {
         Route::get('/toko/create', [TokoController::class,'create'])->name('toko.create');
         Route::post('/toko/store', [TokoController::class,'store'])->name('toko.store');
+        Route::get('/toko/{id}/edit', [TokoController::class,'edit'])->name('toko.edit');
+        Route::put('/toko/{id}', [TokoController::class,'update'])->name('toko.update');
     });
 
-    // ---------------------------
-    // Admin Toko / Super Admin: Daftarkan Kasir
-    // ---------------------------
-    Route::middleware(['auth', 'role:admin_toko,super_admin'])->group(function () {
+    // ADMIN TOKO + SUPER ADMIN
+    Route::middleware('role:admin_toko,role:super_admin')->group(function () {
         Route::get('/kasir/create', [KasirController::class, 'create'])->name('kasir.create');
         Route::post('/kasir/store', [KasirController::class, 'store'])->name('kasir.store');
     });

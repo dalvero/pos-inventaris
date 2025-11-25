@@ -45,7 +45,9 @@ class AuthController extends Controller
     // MENAMPILKAN HALAMAN REGISTER
     public function showRegister()
     {
-        return view('auth.register');
+        return view('auth.register', [
+            'tokos' => \App\Models\Toko::all()
+        ]);
     }
 
     // REGISTER PROSES
@@ -56,16 +58,52 @@ class AuthController extends Controller
             'name'=>'required|string|max:255',
             'email'=>'required|string|email|max:255|unique:users',
             'password'=>'required|string|confirmed|min:6',
+            'role' => 'required|in:kasir,admin_toko',
         ]);
 
-        // MEMBUAT USER BARU
-        $user = User::create([
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'password'=>Hash::make($request->password),
-            'role'=>'kasir', // SET DEFAULT ROLE KASIR
-            'toko_id'=>null // NANTI UPDATE JIKA SUDAH ADA TOKO            
-        ]);
+        $tokoId = null;
+
+         // JIKA KASIR -> AMBIL toko_id DARI DROPDOWN
+        if ($request->role === 'kasir') {
+            $request->validate([
+                'toko_id' => 'required|exists:tokos,id'
+            ]);
+            $tokoId = $request->toko_id;
+
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => 'kasir',
+                'toko_id' => $request->toko_id
+            ]);
+        }
+
+        // JIKA ADMIN TOKO -> BUAT TOKO BARU
+        if ($request->role === 'admin_toko') {
+            $request->validate([
+                'nama_toko' => 'required|unique:tokos,nama_toko'
+            ]);
+
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => 'admin_toko',
+                'toko_id' => null
+            ]);
+
+            $toko = \App\Models\Toko::create([
+                'nama_toko' => $request->nama_toko,
+                'user_id' => $user->id
+            ]);
+
+            $user->update([
+                'toko_id' => $toko->id
+            ]);
+
+            $tokoId = $toko->id;
+        }
 
         // LOGIN OTOMATIS SETELAH REGISTER
         Auth::login($user);
