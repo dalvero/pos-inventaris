@@ -1,0 +1,94 @@
+@extends('toko.layout')
+
+@section('content')
+<div class="p-4 xl:ml-0">
+    {{-- HEADER --}}
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-800">
+            Dashboard {{Auth::user()->toko->nama_toko}}
+        </h2>
+        <p class="text-sm font-semibold text-gray-600">
+            Berikut adalah overview dan statistik dari {{Auth::user()->toko->nama_toko}} milik anda.
+        </p>
+    </div>
+
+    <!-- STATISTIK CARD -->
+    <div class="mt-12">
+        <div class="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
+            <!-- INFO PRODUK CARD -->
+            <div class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
+                <div class="bg-clip-border mx-4 rounded-xl overflow-hidden bg-linear-to-tr from-blue-600 to-blue-400 text-white shadow-blue-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="w-6 h-6 text-white">
+                        <path d="M2.25 2.25a.75.75 0 000 1.5h1.386c.17 0 .318.114.362.278l2.558 9.592a3.752 3.752 0 00-2.806 3.63c0 .414.336.75.75.75h15.75a.75.75 0 000-1.5H5.378A2.25 2.25 0 017.5 15h11.218a.75.75 0 00.674-.421 60.358 60.358 0 002.96-7.228.75.75 0 00-.525-.965A60.864 60.864 0 005.68 4.509l-.232-.867A1.875 1.875 0 003.636 2.25H2.25zM3.75 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM16.5 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" />
+                    </svg>
+                </div>
+                <div class="p-4 text-right">
+                    <p class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">Total Produk</p>
+                    <h4 class="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">248</h4>
+                </div>
+                <div class="border-t border-blue-gray-50 p-4">
+                    <p class="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600">
+                        <strong class="text-green-500">12</strong>&nbsp;produk ditambahkan minggu ini
+                    </p>
+                </div>
+            </div>
+
+            <!-- INFO TRANSAKSI CARD -->
+            <div class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
+                <div class="bg-clip-border mx-4 rounded-xl overflow-hidden bg-linear-to-tr from-pink-600 to-pink-400 text-white shadow-pink-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="w-6 h-6 text-white">
+                        <path d="M12 7.5a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z"></path>
+                        <path fill-rule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 011.5 14.625v-9.75zM8.25 9.75a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM18.75 9a.75.75 0 00-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 00.75-.75V9.75a.75.75 0 00-.75-.75h-.008zM4.5 9.75A.75.75 0 015.25 9h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H5.25a.75.75 0 01-.75-.75V9.75z" clip-rule="evenodd"></path>
+                        <path d="M2.25 18a.75.75 0 000 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 00-.75-.75H2.25z"></path>
+                    </svg>
+                </div>
+                <div class="p-4 text-right">
+                    <p class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">Total Transaksi</p>
+                    <h4 class="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">Rp 45,3 Jt</h4>
+                </div>
+                <div class="border-t border-blue-gray-50 p-4">
+                    <p class="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600">
+                        <strong class="text-green-500">+15%</strong>&nbsp;dari bulan lalu
+                    </p>
+                </div>
+            </div>
+
+            <!-- INFO KASIR CARD -->
+            <div class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
+                <div class="bg-clip-border mx-4 rounded-xl overflow-hidden bg-linear-to-tr from-green-600 to-green-400 text-white shadow-green-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="w-6 h-6 text-white">
+                        <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="p-4 text-right">
+                    <p class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">Total Kasir</p>
+                    <h4 class="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">{{Auth::user()->toko->kasirs()->count()}}</h4>
+                </div>
+                <div class="border-t border-blue-gray-50 p-4">
+                    {{-- CEK KASIR YANG SEDANG BERTUGAS (SHIFT OPENING) --}}
+                    <p class="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600">
+                        <strong class="text-blue-500">3</strong>&nbsp;kasir sedang bertugas
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Content Section -->
+        <div class="mb-4 grid grid-cols-1 gap-6">
+            <div class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md overflow-hidden">
+                <div class="relative bg-clip-border rounded-xl overflow-hidden bg-transparent text-gray-700 shadow-none m-0 flex items-center justify-between p-6">
+                    <div>
+                        <h6 class="block antialiased tracking-normal font-sans text-base font-semibold leading-relaxed text-blue-gray-900 mb-1">Aktivitas Terkini</h6>
+                        <p class="antialiased font-sans text-sm leading-normal flex items-center gap-1 font-normal text-blue-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" aria-hidden="true" class="h-4 w-4 text-blue-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
+                            </svg>
+                            <strong>25 transaksi</strong> hari ini
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

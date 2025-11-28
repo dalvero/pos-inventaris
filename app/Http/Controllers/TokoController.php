@@ -14,6 +14,25 @@ class TokoController extends Controller
         return view('toko.create');
     }
 
+    // DASHBOARD TOKO (MANAJEMEN TOKO)
+    public function dashboard()
+    {
+        return view('toko.dashboard');
+    }
+
+    // HALAMAN KASIR (CARD KASIR)
+    public function kasir()
+    {
+        return view('toko.kasir');
+    }
+
+    // MENAMPILKAN LIST KASIR
+    public function listKasir(){
+        $kasirs = Auth::user()->toko->kasirs;
+
+        return view('toko.kasir', compact('kasirs'));
+    }
+
     // SIMPAN TOKO BARU
     public function store(Request $request)
     {
@@ -64,7 +83,7 @@ class TokoController extends Controller
             'telepon'   => $request->telepon,
         ]);
 
-        return redirect()->route('dashboard')
+        return redirect()->route('toko.dashboard')
             ->with('success', 'Data toko berhasil diperbarui!');
     }
 }

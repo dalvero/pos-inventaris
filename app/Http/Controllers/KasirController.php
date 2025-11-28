@@ -9,6 +9,12 @@ class KasirController extends Controller
     // MENAMPILKAN FORM PENDAFTARAN KASIR
     public function create() { return view('kasir.create'); }
 
+    public function dashboard()
+    {
+        return view('kasir.dashboard');
+    }
+
+
     // MENYIMPAN DATA KASIR BARU
     public function store(Request $request){
         // VALIDASI INPUT

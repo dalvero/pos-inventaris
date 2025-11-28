@@ -1,14 +1,15 @@
-@extends('layouts.app')
-@section('title', 'Edit Data Toko')
+@extends('toko.layout')
 
 @section('content')
-<div class="max-w-3xl mx-auto">
+<div class="p-4 xl:ml-0">
 
-    {{-- TITLE --}}
+    {{-- HEADER --}}
     <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-primary">Edit Data Toko</h1>
-        <p class="text-gray-600 mt-2">
-            Perbarui informasi toko Anda pada form berikut.
+        <h2 class="text-2xl font-bold text-gray-800">
+            Edit data {{Auth::user()->toko->nama_toko}}
+        </h2>
+        <p class="text-sm font-semibold text-gray-600">
+            Perbarui data melalui form berikut.
         </p>
     </div>
 
@@ -59,14 +60,9 @@
             </div>
 
             {{-- BUTTONS --}}
-            <div class="flex justify-between mt-8">
-                <a href="{{ route('dashboard') }}"
-                    class="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium transition">
-                    Kembali
-                </a>
-
+            <div class="flex justify-between mt-8"> 
                 <button type="submit"
-                        class="px-6 py-2 rounded-lg bg-primary text-white hover:bg-primary/80 font-semibold transition">
+                        class="cursor-pointer px-6 py-2 rounded-lg bg-primary text-white hover:bg-primary/80 font-semibold transition">
                     Simpan Perubahan
                 </button>
             </div>

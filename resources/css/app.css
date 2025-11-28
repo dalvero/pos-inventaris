@@ -7,7 +7,7 @@
 
 @theme {
     /* FONT */
-    --font-sans: 'Poppins', 'Instrument Sans', ui-sans-serif, system-ui;
+    --font-sans: 'Poppins', sans-serif;
 
     /* COLORS */        
     --color-secondary: #10B981;
@@ -38,3 +38,5 @@
     --shadow-soft: 0 4px 14px rgba(0,0,0,0.08);
     --shadow-card: 0 8px 20px rgba(0,0,0,0.12);
 }
+
+

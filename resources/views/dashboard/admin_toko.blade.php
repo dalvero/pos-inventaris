@@ -30,31 +30,26 @@
 
         {{-- CARD TOKO --}}
         <div class="p-6 rounded-xl shadow-md bg-white border border-gray-200">
-            <h2 class="text-xl font-bold text-primary mb-3">Manajemen Toko</h2>
-            <p class="text-gray-700 mb-5">Kelola informasi toko Anda di sini.</p>
+            <h2 class="text-xl font-bold text-primary mb-3">Manajemen {{ Auth::user()->toko->nama_toko }}</h2>
+            <p class="text-gray-700 font-medium mb-5">Ayo kelola informasi toko Anda di sini.</p>
 
-            @if(Auth::user()->toko)
-                <a href="{{ route('toko.edit', Auth::user()->toko->id) }}"
-                   class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-4 py-2 rounded-lg transition">
-                    Edit Data Toko
-                </a>
-            @else
-                <a href="{{ route('toko.create') }}"
-                   class="inline-block bg-primary hover:bg-primary/80 text-white font-medium px-4 py-2 rounded-lg transition">
-                    Daftarkan Toko
-                </a>
-            @endif
+            {{-- Tombol Lihat Toko --}}
+            <a href="{{ route('toko.dashboard') }}"
+               class="inline-block font-semibold bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg transition">
+               Lihat Toko
+            </a>
         </div>
 
         {{-- CARD KASIR --}}
         <div class="p-6 rounded-xl shadow-md bg-white border border-gray-200">
             <h2 class="text-xl font-bold text-primary mb-3">Manajemen Kasir</h2>
-            <p class="text-gray-700 mb-5">Tambahkan atau kelola akun kasir yang bekerja di toko Anda.</p>
+            <p class="text-gray-700 font-medium mb-5">Tambahkan atau kelola akun kasir toko Anda.</p>
 
-            <a href="{{ route('kasir.create') }}"
-               class="inline-block bg-secondary hover:bg-accent text-white font-medium px-4 py-2 rounded-lg transition">
-                Daftarkan Kasir
-            </a>
+            {{-- Tombol Lihat Kasir --}}
+            <a href="{{ route('kasir.dashboard') }}"
+               class="inline-block bg-secondary font-semibold hover:bg-accent text-white px-4 py-2 rounded-lg transition">
+               Lihat Kasir
+            </a>            
         </div>
 
     </div>
