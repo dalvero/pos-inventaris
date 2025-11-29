@@ -12,6 +12,7 @@ class AuthController extends Controller
     // MENAMPILKAN HALAMAN LOGIN
     public function showLogin()
     {
+        // INI ADALAH HALAMAN LOGIN
         return view('auth.login');
     }
 
