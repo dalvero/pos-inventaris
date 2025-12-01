@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TokoController;
 use App\Http\Controllers\KasirController;
+use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\BahanBakuController;
 
 // LANDING PAGE
 Route::get('/', [HomeController::class,'index'])->name('home');
@@ -36,11 +38,28 @@ Route::middleware('auth')->group(function () {
         Route::put('/toko/{id}', [TokoController::class,'update'])->name('toko.update');
     });
 
-    // ADMIN TOKO dan SUPER ADMIN
+    // ADMIN TOKO DAN SUPER ADMIN
     Route::middleware('role:admin_toko,super_admin')->group(function () {
         Route::get('/kasir/dashboard', [KasirController::class, 'dashboard'])->name('kasir.dashboard');
-        Route::get('/kasir/create', [KasirController::class, 'create'])->name('kasir.create');
+        Route::get('/kasir/kasir', [KasirController::class, 'listKasir'])->name('kasir.kasir');        
+        Route::get('/kasir/{id}', [KasirController::class, 'show'])->name('kasir.show');    
         Route::post('/kasir/store', [KasirController::class, 'store'])->name('kasir.store');
+        Route::delete('/kasir/{id}', [KasirController::class, 'destroy'])->name('kasir.destroy');
+        
+        // PRODUK
+        Route::get('/produk/dashboard', [ProdukController::class, 'dashboard']) -> name('produk.dashboard');
+        Route::get('/produk/produk', [ProdukController::class, 'listProduk'])->name('produk.produk'); 
+        Route::get('/produk/search', [ProdukController::class, 'search'])->name('produk.search');
+        Route::get('/produk/create', [ProdukController::class, 'create'])->name('produk.create');
+        Route::delete('produk/{id}', [ProdukController::class, 'destroy'])->name('produk.destroy');
+        Route::post('/produk', [ProdukController::class, 'store'])->name('produk.store');
+
+        // BAHAN BAKU
+        Route::get('/bahanbaku/dashboard', [BahanBakuController::class, 'dashboard'])->name('bahanbaku.dashboard');
+        Route::get('/bahanbaku/bahanbaku', [BahanBakuController::class, 'listBahan'])->name('bahanbaku.bahanbaku');
+        Route::get('/bahanbaku/create', [BahanBakuController::class, 'create'])->name('bahanbaku.create');
+        Route::get('/bahanbaku/search', [BahanBakuController::class, 'search'])->name('bahanbaku.search');
+        Route::post('/bahanbaku', [BahanBakuController::class, 'store'])->name('bahanbaku.store');
     });
 
 });

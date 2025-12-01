@@ -10,7 +10,10 @@ class Produk extends Model
     use HasFactory;
 
     protected $fillable = [
-        'toko_id', 'nama_produk', 'harga'
+        'toko_id',
+        'nama_produk',
+        'harga',
+        'foto'
     ];
 
     public function toko()
