@@ -17,7 +17,9 @@ class BahanBakuController extends Controller
     // LIST BAHAN BAKU
     public function listBahan()
     {
-        $bahans = BahanBaku::where('toko_id', Auth::user()->toko->id)->get();
+        $bahans = BahanBaku::where('toko_id', Auth::user()->toko->id)
+            ->orderBy('nama_bahan', 'asc')
+            ->paginate(10); // ATUR BERAPA DATA PER HALAMAN
 
         return view('bahanbaku.bahanbaku', compact('bahans'));
     }
@@ -35,7 +37,10 @@ class BahanBakuController extends Controller
 
         $bahans = BahanBaku::where('toko_id', Auth::user()->toko->id)
             ->where('nama_bahan', 'LIKE', "%{$query}%")
-            ->get();
+            ->orderBy('nama_bahan', 'asc')
+            ->paginate(10)
+            ->appends(['query' => $query]); // AGAR PAGE TIDAK RESET SAAR SEARCH
+
 
         return view('bahanbaku.bahanbaku', [
             'bahans' => $bahans,

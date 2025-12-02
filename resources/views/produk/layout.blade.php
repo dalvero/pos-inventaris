@@ -59,6 +59,18 @@
                             </button>
                         </a>
                     </li>
+
+                    {{-- RESEP PRODUK --}}
+                    <li>
+                        <a href="{{route('resep.resep')}}" class="{{ request()->routeIs('resep.resep') ? 'active' : ''}}">
+                            <button class="cursor-pointer middle none font-sans font-bold center transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 rounded-lg {{ request()->routeIs('resep.resep') ? 'bg-linear-to-tr  from-orange-900 to-orange-400 text-white shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/40' : 'text-white hover:bg-white/10' }} active:opacity-[0.85] w-full flex items-center gap-4 px-4 capitalize" type="button">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM12 18.75h.008v.008H12v-.008Z" />
+                                </svg>
+                                <p class="block antialiased font-sans text-base leading-relaxed text-inherit font-medium capitalize">Resep Produk</p>
+                            </button>
+                        </a>
+                    </li>
                 </ul>
 
                 {{-- BACK SECTION --}}

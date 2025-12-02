@@ -12,6 +12,7 @@
         </p>
     </div>
 
+    {{-- CARD CONTENT --}}
     <div class="mt-12">
         <div class="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
             <!-- INFO TOTAL BAHAN BAKU CARD -->
@@ -35,6 +36,20 @@
                 </div>
             </div>
 
+            @php
+                // MENGHITUNG BAHAN BAKU YANG STATUS STOKNYA MENIPIS DAN HABIS
+                $bahanBaku = Auth::user()->toko->bahanBakus;
+                $stokMenipis = 0;
+                $stokHabis = 0;
+                foreach($bahanBaku as $bahan){                
+                    if ($bahan->stok <= 0) {
+                        $stokHabis++;
+                    } elseif ($bahan->stok <= $bahan->minimum_stok) {
+                        $stokMenipis++;
+                    }   
+                }
+            @endphp
+
             <!-- INFO BAHAN BAKU STOK MENIPIS CARD -->
             <div class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
                 <div class="bg-clip-border mx-4 rounded-xl overflow-hidden bg-linear-to-tr from-orange-600 to-orange-400 text-white shadow-orange-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center">
@@ -45,7 +60,7 @@
                 <div class="p-4 text-right">
                     <p class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">Stok Menipis</p>
                     <h4 class="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">
-                        8
+                        {{ $stokMenipis}}
                     </h4>
                 </div>
                 <div class="border-t border-blue-gray-50 p-4">
@@ -55,7 +70,7 @@
                 </div>
             </div>
 
-            <!-- INFO PRODUK HABIS CARD -->
+            <!-- INFO BAHAN BAKU HABIS CARD -->
             <div class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md">
                 <div class="bg-clip-border mx-4 rounded-xl overflow-hidden bg-linear-to-tr from-red-600 to-red-400 text-white shadow-red-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-white">
@@ -63,9 +78,9 @@
                     </svg>
                 </div>
                 <div class="p-4 text-right">
-                    <p class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">Produk Habis</p>
+                    <p class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600">Bahan Baku Habis</p>
                     <h4 class="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900">
-                        5
+                        {{ $stokHabis}}
                     </h4>
                 </div>
                 <div class="border-t border-blue-gray-50 p-4">
@@ -74,7 +89,36 @@
                     </p>
                 </div>
             </div>
-        </div>    
+        </div>  
+
+        {{-- LIST BAHAN BAKU YANG PERLU DI RESTOK --}}
+        <div class="mt-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                Bahan Baku yang Perlu Di restok
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-sm font-semibold text-gray-700">Nama Bahan Baku</th>
+                            <th class="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-sm font-semibold text-gray-700">Stok Saat Ini</th>
+                            <th class="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-sm font-semibold text-gray-700">Minimum Stok</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($bahanBaku as $bahan)
+                            @if($bahan->stok <= $bahan->minimum_stok)
+                                <tr>
+                                    <td class="px-6 py-4 border-b border-gray-200 text-sm text-gray-800">{{ $bahan->nama_bahan }}</td>
+                                    <td class="px-6 py-4 border-b border-gray-200 text-sm text-gray-800">{{ $bahan->stok }}</td>
+                                    <td class="px-6 py-4 border-b border-gray-200 text-sm text-gray-800">{{ $bahan->minimum_stok }}</td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

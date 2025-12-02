@@ -10,13 +10,13 @@ class ResepProduk extends Model
     use HasFactory;
 
     protected $fillable = [
-        'produk_id', 'bahan_id', 'jumlah'
+        'produk_id', 'bahan_id', 'jumlah', 'foto'
     ];
 
     public function produk()
     {
         // RELASI KE TABEL PRODUK -> ONE TO MANY LEWAT produk_id
-        return $this->belongsTo(Produk::class);
+        return $this->belongsTo(Produk::class, 'produk_id');
     }
 
     public function bahan()

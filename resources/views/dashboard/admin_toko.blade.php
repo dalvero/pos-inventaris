@@ -70,7 +70,7 @@
             <p class="text-gray-700 font-medium mb-5">Tambahkan atau kelola bahan baku di toko Anda.</p>
 
             {{-- TOMBOL LIHAT BAHAN BAKU --}}
-            <a href="{{ route('produk.dashboard') }}"
+            <a href="{{ route('bahanbaku.dashboard') }}"
                class="inline-block bg-violet-500 font-semibold hover:bg-violet-400 text-white px-4 py-2 rounded-lg transition">
                Lihat Bahan Baku
             </a>            

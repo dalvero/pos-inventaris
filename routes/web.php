@@ -8,6 +8,7 @@ use App\Http\Controllers\TokoController;
 use App\Http\Controllers\KasirController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\BahanBakuController;
+use App\Http\Controllers\ResepProdukController;
 
 // LANDING PAGE
 Route::get('/', [HomeController::class,'index'])->name('home');
@@ -51,15 +52,26 @@ Route::middleware('auth')->group(function () {
         Route::get('/produk/produk', [ProdukController::class, 'listProduk'])->name('produk.produk'); 
         Route::get('/produk/search', [ProdukController::class, 'search'])->name('produk.search');
         Route::get('/produk/create', [ProdukController::class, 'create'])->name('produk.create');
-        Route::delete('produk/{id}', [ProdukController::class, 'destroy'])->name('produk.destroy');
+        Route::delete('/produk/{id}', [ProdukController::class, 'destroy'])->name('produk.destroy');
         Route::post('/produk', [ProdukController::class, 'store'])->name('produk.store');
+        
+
+        // RESEP PRODUK
+        Route::get('/resep/resep', [ResepProdukController::class, 'listResep'])->name('resep.resep');
+        Route::post('/resep', [ResepProdukController::class, 'store'])->name('resep.store');
+        Route::get('/resep/search', [ResepProdukController::class, 'search'])->name('resep.search');
+        Route::delete('/resep/{id}', [ResepProdukController::class, 'destroy'])->name('resep.destroy');
+        Route::put('/resep/{id}', [ResepProdukController::class, 'update'])->name('resep.update');
 
         // BAHAN BAKU
         Route::get('/bahanbaku/dashboard', [BahanBakuController::class, 'dashboard'])->name('bahanbaku.dashboard');
         Route::get('/bahanbaku/bahanbaku', [BahanBakuController::class, 'listBahan'])->name('bahanbaku.bahanbaku');
         Route::get('/bahanbaku/create', [BahanBakuController::class, 'create'])->name('bahanbaku.create');
         Route::get('/bahanbaku/search', [BahanBakuController::class, 'search'])->name('bahanbaku.search');
-        Route::post('/bahanbaku', [BahanBakuController::class, 'store'])->name('bahanbaku.store');
+        Route::post('/bahanbaku', [BahanBakuController::class, 'store'])->name('bahanbaku.store');        
+        Route::get('/bahanbaku/{id}/edit', [BahanBakuController::class,'edit'])->name('bahanbaku.edit');
+        Route::put('/bahanbaku/{id}', [BahanBakuController::class,'update'])->name('bahanbaku.update');
+        Route::delete('/bahanbaku/{id}', [BahanBakuController::class, 'destroy'])->name('bahanbaku.destroy');
     });
 
 });

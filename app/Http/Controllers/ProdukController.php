@@ -14,7 +14,7 @@ class ProdukController extends Controller
         return view('produk.dashboard');
     }
 
-    // // LIST PRODUK
+    // LIST PRODUK
     public function listProduk(){
         $produks = Auth::user()->toko->produks;
 
@@ -72,7 +72,7 @@ class ProdukController extends Controller
     {
         $produk = Produk::findOrFail($id);
 
-        // Pastikan produk milik toko admin
+        // PASTIKAN PRODUK MILIK TOKO ADMIN
         if ($produk->toko_id !== Auth::user()->toko->id) {
             abort(403);
         }
@@ -95,14 +95,14 @@ class ProdukController extends Controller
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Jika upload foto baru
+        // JIKA UPLOAD FOTO BARU
         if ($request->hasFile('foto')) {
-            // Hapus foto lama
+            // HAPUS FOTO LAMA
             if ($produk->foto) {
                 Storage::disk('public')->delete($produk->foto);
             }
 
-            // Upload foto baru
+            // UPLOAD FOTO BARU
             $produk->foto = $request->file('foto')->store('produk', 'public');
         }
 
