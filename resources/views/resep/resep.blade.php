@@ -16,10 +16,10 @@
         {{-- CARD TAMBAH PRODUK --}}
         <div onclick="openResepModal('create')"
              class="flex bg-white rounded-xl shadow-md hover:shadow-lg transition cursor-pointer group">
-            <div class="w-32 h-full bg-emerald-50 flex items-center justify-center rounded-l-xl group-hover:bg-emerald-100 transition">
+            <div class="w-32 h-full bg-orange-50 flex items-center justify-center rounded-l-xl group-hover:bg-orange-100 transition">
                 <div class="w-20 h-20 flex items-center justify-center bg-white rounded-full shadow group-hover:scale-110 transition">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                         stroke-width="2" stroke="currentColor" class="w-10 h-10 text-emerald-500">
+                         stroke-width="2" stroke="currentColor" class="w-10 h-10 text-orange-500">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
                 </div>
@@ -107,7 +107,7 @@
         class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
         
         <div id="modalContent"
-            class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 relative mx-4">
+            class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 relative mx-4">
 
             <h2 id="modalTitle" class="text-xl font-bold mb-4 text-gray-800">Tambah Resep</h2>
 
@@ -125,7 +125,7 @@
 
                 {{-- PRODUK --}}
                 <div class="mb-4">
-                    <label class="block text-sm font-semibold mb-2 text-gray-700">Pilih Produk</label>
+                    <label class="cursor-pointer block text-sm font-semibold mb-2 text-gray-700">Pilih Produk</label>
                     <select name="produk_id" id="inputProduk" required
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-emerald-500">
                         <option value="">-- Pilih Produk --</option>
@@ -142,19 +142,19 @@
 
                 <button type="button"
                     onclick="addBahanRow()"
-                    class="w-full py-2 mb-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    class="cursor-pointer w-full py-2 mb-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
                     + Tambah Bahan
                 </button>
 
                 {{-- BUTTON --}}
                 <div class="flex justify-end gap-3 mt-6">
                     <button type="button" onclick="closeResepModal()"
-                        class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                        class="cursor-pointer px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                         Batal
                     </button>
 
                     <button type="submit"
-                        class="px-5 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                        class="cursor-pointer px-5 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
                         Simpan
                     </button>
                 </div>
@@ -213,7 +213,7 @@
         <!-- FOOTER -->
         <div class="p-4 border-t border-gray-200 bg-gray-50 flex justify-end">
             <button onclick="closeDetailResep()"
-                    class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-semibold text-gray-700 transition">
+                    class="cursor-pointer px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-semibold text-gray-700 transition">
                 Tutup
             </button>
         </div>
@@ -303,7 +303,7 @@
                 <input type="number" name="jumlah[]" required min="0" step="0.01" value="${jumlahValue}"
                     class="w-24 border border-gray-300 rounded-lg px-3 py-2" placeholder="Qty">
                 <button type="button" onclick="this.parentElement.remove()"
-                    class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">X</button>
+                    class="cursor-pointer px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">X</button>
             </div>
         `;
         wrapper.insertAdjacentHTML('beforeend', html);

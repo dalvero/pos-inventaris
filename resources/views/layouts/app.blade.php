@@ -32,7 +32,7 @@
         </div>
     </nav>
 
-    <main class="p-6">
+    <main class="px-6">
        @if(session('success'))
             <div 
                 x-data="{ show: true }"
