@@ -9,6 +9,7 @@ use App\Http\Controllers\KasirController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\ResepProdukController;
+use App\Http\Controllers\POSController;
 
 // LANDING PAGE
 Route::get('/', [HomeController::class,'index'])->name('home');
@@ -72,6 +73,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/bahanbaku/{id}/edit', [BahanBakuController::class,'edit'])->name('bahanbaku.edit');
         Route::put('/bahanbaku/{id}', [BahanBakuController::class,'update'])->name('bahanbaku.update');
         Route::delete('/bahanbaku/{id}', [BahanBakuController::class, 'destroy'])->name('bahanbaku.destroy');
+    });
+
+    // KASIR DAN SUPERADMIN
+    Route::middleware('role:kasir, super_admin')->group(function () {
+        Route::get('/pos/menupesanan', [POSController::class, 'menupesanan'])->name('pos.menupesanan');
+        Route::get('/pos/resep', [POSController::class, 'resep'])->name('pos.resep');
+        Route::get('/pos/bahanbaku', [POSController::class, 'listBahan'])->name('pos.bahanbaku');
+        Route::get('/bahanbaku', [POSController::class, 'listBahan'])->name('pos.bahanbaku');
+        Route::get('/transaksi', [POSController::class, 'listTransaksi'])->name('pos.transaksi');
+        Route::post('/pos/checkout', [POSController::class, 'checkout'])->name('pos.checkout');
+        Route::get('/detail-pesanan/{id}', [POSController::class, 'showStruk'])->name('pos.detailpesanan');
     });
 
 });
