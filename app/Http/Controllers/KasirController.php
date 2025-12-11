@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Shift;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,14 +15,29 @@ class KasirController extends Controller
 
     public function dashboard()
     {
-        return view('kasir.dashboard');
+        $tokoId = Auth::user()->toko_id;
+
+        $kasirAktif = Shift::where('toko_id', $tokoId)
+            ->whereNull('closing')
+            ->with('kasir')
+            ->get();
+
+        return view('kasir.dashboard',compact('kasirAktif'));
     }
 
     // MENAMPILKAN LIST KASIR
     public function listKasir(){
         $kasirs = Auth::user()->toko->kasirs;
 
-        return view('kasir.kasir', compact('kasirs'));
+        $tokoId = Auth::user()->toko_id;
+
+        // AMBIL SHIFT AKTIF (CLOSING NULL)
+        $kasirAktif = Shift::where('toko_id', $tokoId)
+            ->whereNull('closing')
+            ->pluck('kasir_id')  // HANYA AMBIL ID KASIR
+            ->toArray();
+
+        return view('kasir.kasir', compact('kasirs', 'kasirAktif'));
     }
 
     // MENYIMPAN DATA KASISR BARU

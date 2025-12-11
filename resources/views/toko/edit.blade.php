@@ -16,7 +16,7 @@
     {{-- CARD FORM --}}
     <div class="p-8 rounded-xl shadow-md bg-white border border-gray-200">
 
-        <form action="{{ route('toko.update', $toko->id) }}" method="POST">
+        <form action="{{ route('toko.update', $toko->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -57,6 +57,30 @@
                 @error('telepon')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
+            </div>
+
+            {{-- QR PEMBAYARAN --}}
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">
+                    Upload QR Pembayaran (QRIS)
+                </label>
+
+                <input type="file" name="qr_image"
+                    accept="image/*"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white cursor-pointer focus:ring-primary focus:border-primary">
+
+                @error('qr_image')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+
+                {{-- PREVIEW GAMBAR LAMA --}}
+                @if ($toko->qr_image)
+                    <div class="mt-4">
+                        <p class="text-gray-700 font-medium mb-2">QR Saat Ini:</p>
+                        <img src="{{ asset('storage/' . $toko->qr_image) }}"
+                             class="w-40 border rounded-lg shadow">
+                    </div>
+                @endif
             </div>
 
             {{-- BUTTONS --}}

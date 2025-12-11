@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Toko;
+use App\Models\Shift;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,7 +18,15 @@ class TokoController extends Controller
     // DASHBOARD TOKO (MANAJEMEN TOKO)
     public function dashboard()
     {
-        return view('toko.dashboard');
+        $tokoId = Auth::user()->toko_id;
+
+        $kasirAktif = Shift::where('toko_id', $tokoId)
+            ->whereNull('closing')
+            ->with('kasir')
+            ->get();
+
+        return view('toko.dashboard', compact('kasirAktif'));
+        
     }
 
     // HALAMAN KASIR (CARD KASIR)
@@ -38,16 +47,23 @@ class TokoController extends Controller
     {
         $request->validate([
             'nama_toko' => 'required|string|max:255',
-            'alamat' => 'required|string|max:500',
-            'telepon' => 'required|string|max:20',
+            'alamat'    => 'required|string|max:500',
+            'telepon'   => 'required|string|max:20',
+            'qr_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Membuat toko baru untuk admin
+        // UPLOAD QR JIKA ADA
+        $qrPath = null;
+        if ($request->hasFile('qr_image')) {
+            $qrPath = $request->file('qr_image')->store('qris', 'public');
+        }
+
         $toko = Toko::create([
             'nama_toko' => $request->nama_toko,
             'alamat'    => $request->alamat,
             'telepon'   => $request->telepon,
-            'user_id'   => Auth::id()
+            'qr_image'  => $qrPath,
+            'user_id'   => Auth::id(),
         ]);
 
         return redirect()->route('dashboard')
@@ -58,7 +74,7 @@ class TokoController extends Controller
     public function edit($id)
     {
         $toko = Toko::where('id', $id)
-                    ->where('user_id', Auth::id()) // aman: milik user
+                    ->where('user_id', Auth::id())
                     ->firstOrFail();
 
         return view('toko.edit', compact('toko'));
@@ -71,17 +87,33 @@ class TokoController extends Controller
             'nama_toko' => 'required|string|max:255',
             'alamat'    => 'required|string|max:500',
             'telepon'   => 'required|string|max:20',
+            'qr_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $toko = Toko::where('id', $id)
                     ->where('user_id', Auth::id())
                     ->firstOrFail();
 
-        $toko->update([
-            'nama_toko' => $request->nama_toko,
-            'alamat'    => $request->alamat,
-            'telepon'   => $request->telepon,
-        ]);
+        // JIKA UPLOAD QR BARU
+        if ($request->hasFile('qr_image')) {
+
+            // HAPUS QR LAMA JIKA ADA
+            if ($toko->qr_image && Storage::disk('public')->exists($toko->qr_image)) {
+                Storage::disk('public')->delete($toko->qr_image);
+            }
+
+            // UPLOAD QR BARU
+            $qrPath = $request->file('qr_image')->store('qris', 'public');
+
+            $toko->qr_image = $qrPath;
+        }
+
+        // UPDATE DATA TOKO LAINNYA
+        $toko->nama_toko = $request->nama_toko;
+        $toko->alamat    = $request->alamat;
+        $toko->telepon   = $request->telepon;
+
+        $toko->save();
 
         return redirect()->route('toko.dashboard')
             ->with('success', 'Data toko berhasil diperbarui!');

@@ -10,6 +10,7 @@ use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\ResepProdukController;
 use App\Http\Controllers\POSController;
+use App\Http\Controllers\ShiftController;
 
 // LANDING PAGE
 Route::get('/', [HomeController::class,'index'])->name('home');
@@ -56,7 +57,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/produk/{id}', [ProdukController::class, 'destroy'])->name('produk.destroy');
         Route::post('/produk', [ProdukController::class, 'store'])->name('produk.store');
         
-
         // RESEP PRODUK
         Route::get('/resep/resep', [ResepProdukController::class, 'listResep'])->name('resep.resep');
         Route::post('/resep', [ResepProdukController::class, 'store'])->name('resep.store');
@@ -76,14 +76,24 @@ Route::middleware('auth')->group(function () {
     });
 
     // KASIR DAN SUPERADMIN
-    Route::middleware('role:kasir, super_admin')->group(function () {
+    Route::middleware('role:kasir,super_admin')->group(function () {        
+        Route::post('/kasir/opening', [ShiftController::class, 'opening'])->name('kasir.opening');
+        Route::post('/kasir/closing', [ShiftController::class, 'closing'])->name('kasir.closing');
+        
+        // POS
         Route::get('/pos/menupesanan', [POSController::class, 'menupesanan'])->name('pos.menupesanan');
+        Route::post('/pos/checkout', [POSController::class, 'checkout'])->name('pos.checkout');
+        
+        // PEMBAYARAN
+        Route::get('/pembayaran/{id}', [POSController::class, 'pembayaran'])->name('pos.pembayaran');
+        Route::post('/pembayaran/{id}/cash', [POSController::class, 'bayarCash'])->name('pos.bayar.cash');
+        Route::post('/pembayaran/{id}/qris', [POSController::class, 'bayarQris'])->name('pos.bayar.qris');
+                
+        // STRUK & TRANSAKSI
+        Route::get('/struk-pesanan/{id}', [POSController::class, 'showStruk'])->name('pos.strukpesanan');
         Route::get('/pos/resep', [POSController::class, 'resep'])->name('pos.resep');
         Route::get('/pos/bahanbaku', [POSController::class, 'listBahan'])->name('pos.bahanbaku');
-        Route::get('/bahanbaku', [POSController::class, 'listBahan'])->name('pos.bahanbaku');
         Route::get('/transaksi', [POSController::class, 'listTransaksi'])->name('pos.transaksi');
-        Route::post('/pos/checkout', [POSController::class, 'checkout'])->name('pos.checkout');
-        Route::get('/detail-pesanan/{id}', [POSController::class, 'showStruk'])->name('pos.detailpesanan');
     });
 
 });

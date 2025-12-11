@@ -19,7 +19,7 @@ class POSController extends Controller
 {
     public function menupesanan()
     {
-        // Pastikan user login & punya toko
+        // PASTIKAN USER LOGIN & PUNYA TOKO
         if (!Auth::check() || !Auth::user()->toko_id) {
             return redirect()->route('login')->with(
                 'error',
@@ -29,165 +29,307 @@ class POSController extends Controller
 
         $tokoId = Auth::user()->toko_id;
 
-        // Ambil produk milik toko
+        // AMBIL PRODUK MILIK TOKO
         $produk = Produk::select('id', 'nama_produk', 'harga', 'foto')
             ->where('toko_id', $tokoId)
             ->orderBy('nama_produk', 'asc')
             ->get();
-
-        // Kirim data ke view
+        
         return view('pos.menupesanan', compact('produk'));
     }
 
     public function checkout(Request $request)
     {
-        // 1. Validasi Dasar Request
-        $request->validate([
-            'total_amount' => 'required|numeric|min:0',
-            'customer_name' => 'required|string|max:255',
-            'cart_items' => 'required|array|min:1',
-            'cart_items.*.produk_id' => 'required|exists:produks,id',
-            'cart_items.*.quantity' => 'required|integer|min:1',
-            'cart_items.*.harga_satuan' => 'required|numeric|min:0',
-        ]);
-
-        $tokoId = Auth::user()->toko_id;
-        $cartItems = $request->input('cart_items');
-        $grandTotal = $request->input('total_amount');
-        $customerName = $request->input('customer_name');
-
-        // 2. Kumpulkan Total Kebutuhan Bahan Baku (Pengecekan Stok Gabungan)
-        $totalBahanDibutuhkan = [];
-        
-        // Ambil ID produk yang ada di keranjang
-        $produkIds = collect($cartItems)->pluck('produk_id')->unique();
-        
-        // Eager load semua resep yang dibutuhkan dari produk-produk di keranjang
-        $produkDiKeranjang = Produk::whereIn('id', $produkIds)
-            ->with(['resepProduks.bahan'])
-            ->get()
-            ->keyBy('id'); // Key by ID agar mudah dicari
-
-        foreach ($cartItems as $item) {
-            $produk = $produkDiKeranjang->get($item['produk_id']);
-            $qty = $item['quantity'];
-
-            // Jika produk tidak ditemukan atau tidak memiliki resep, lewati
-            if (!$produk || $produk->resepProduks->isEmpty()) {
-                continue; 
-            }
-
-            foreach ($produk->resepProduks as $resep) {
-                $bahanId = $resep->bahan_id;
-                $jumlahPerUnit = $resep->jumlah;
-                $totalKebutuhanItem = $jumlahPerUnit * $qty;
-
-                // Tambahkan total kebutuhan ke array gabungan
-                // Ini menangani pembagian stok (Gula Cair) untuk berbagai menu.
-                $totalBahanDibutuhkan[$bahanId] = ($totalBahanDibutuhkan[$bahanId] ?? 0) + $totalKebutuhanItem;
-            }
-        }
-        
-        // 3. Validasi Stok Akhir
-        foreach ($totalBahanDibutuhkan as $bahanId => $kebutuhan) {
-            $bahan = BahanBaku::find($bahanId); // Ambil data BahanBaku untuk stok aktual
-            
-            // Cek apakah stok bahan baku mencukupi
-            if (!$bahan || $bahan->stok < $kebutuhan) {
-                $bahanName = $bahan ? $bahan->nama_bahan : 'Bahan Tidak Dikenal';
-                // jika request ajax / expects json
-                if ($request->wantsJson() || $request->ajax()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Stok bahan baku '{$bahanName}' tidak mencukupi. Dibutuhkan: {$kebutuhan}, Tersedia: " . ($bahan->stok ?? 0)
-                    ], 400);
-                }
-                return redirect()->back()->with('stok_habis', [
-                    'judul' => 'Stok Tidak Cukup!',
-                    'pesan' => "Stok bahan baku '{$bahanName}' tidak mencukupi..."
-                ]);
-            }
-        }
-        
-        // 4. Proses Transaksi (Menggunakan Database Transaction untuk keamanan)
         try {
-            DB::beginTransaction();
-
-            // 4a. Buat Transaksi Header
-            $transaksi = Transaksi::create([
-                'toko_id' => $tokoId,
-                'user_id' => Auth::id(),
-                'nama_pelanggan' => $customerName,
-                'total_harga' => $grandTotal,
-                'waktu_transaksi' => Carbon::now(),
+            // VALIDASI INPUT
+            $request->validate([
+                'total_amount' => 'required|numeric|min:0',
+                'customer_name' => 'required|string|max:255',
+                'cart_items' => 'required|array|min:1',
+                'cart_items.*.produk_id' => 'required|exists:produks,id',
+                'cart_items.*.quantity' => 'required|integer|min:1',
+                'cart_items.*.harga_satuan' => 'required|numeric|min:0',
             ]);
 
-            // 4b. Buat Detail Transaksi dan Kurangi Stok Bahan Baku
+            $tokoId = Auth::user()->toko_id;
+            
+            // VALIDASI USER MEMILIKI TOKO
+            if (!$tokoId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak memiliki toko yang terdaftar'
+                ], 403);
+            }
+
+            $cartItems = $request->input('cart_items');
+            $grandTotal = $request->input('total_amount');
+            $customerName = $request->input('customer_name', 'Umum');
+
+            // KUMPULKAN TOTAL KEBUTUHAN BAHAN BAKU
+            $totalBahanDibutuhkan = [];
+            
+            $produkIds = collect($cartItems)->pluck('produk_id')->unique();
+            
+            // LOAD PRODUK DENGAN RELASI LENGKAP
+            $produkDiKeranjang = Produk::whereIn('id', $produkIds)
+                ->where('toko_id', $tokoId) // PASTIKAN PRODUK MILIK TOKO YANG SAMA
+                ->with(['resepProduks' => function($query) {
+                    $query->with('bahan');
+                }])
+                ->get()
+                ->keyBy('id');
+
+            // VALIDASI SEMUA PRODUK DITEMUKAN
             foreach ($cartItems as $item) {
-                // Buat Detail Transaksi
-                DetailTransaksi::create([
-                    'transaksi_id' => $transaksi->id,
-                    'produk_id' => $item['produk_id'],
-                    'jumlah' => $item['quantity'],
-                    'harga_satuan' => $item['harga_satuan'],
-                ]);
-
-                // Kurangi Stok Bahan Baku
-                $produk = $produkDiKeranjang->get($item['produk_id']);
-                
-                foreach ($produk->resepProduks as $resep) {
-                    $bahan = $resep->bahan; // Relasi bahan sudah di-load dari BahanBaku
-                    $jumlahPerUnit = $resep->jumlah;
-                    $totalKebutuhanItem = $jumlahPerUnit * $item['quantity'];
-
-                    // Lakukan pengurangan stok aktual
-                    // NOTE: Pengurangan stok berdasarkan total kebutuhan yang dihitung di Langkah 2
-                    $bahan->stok -= $totalKebutuhanItem; 
-                    $bahan->save(); // Update stok di database
+                if (!$produkDiKeranjang->has($item['produk_id'])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Produk dengan ID ' . $item['produk_id'] . ' tidak ditemukan atau bukan milik toko Anda'
+                    ], 404);
                 }
             }
 
-            DB::commit();
+            // HITUNG TOTAL KEBUTUHAN BAHAN
+            foreach ($cartItems as $item) {
+                $produk = $produkDiKeranjang->get($item['produk_id']);
+                $qty = $item['quantity'];
 
+                // SKIP JIKA PRODUK TIDAK PUNYA RESEP
+                if (!$produk || !$produk->resepProduks || $produk->resepProduks->isEmpty()) {
+                    \Log::warning("Produk ID {$item['produk_id']} tidak memiliki resep");
+                    continue; 
+                }
+
+                foreach ($produk->resepProduks as $resep) {
+                    // VALIDASI BAHAN ADA
+                    if (!$resep->bahan) {
+                        \Log::error("Resep ID {$resep->id} tidak memiliki bahan yang terkait");
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Data resep tidak lengkap untuk produk: ' . $produk->nama_produk
+                        ], 400);
+                    }
+
+                    $bahanId = $resep->bahan_id;
+                    $jumlahPerUnit = $resep->jumlah;
+                    $totalKebutuhanItem = $jumlahPerUnit * $qty;
+
+                    $totalBahanDibutuhkan[$bahanId] = ($totalBahanDibutuhkan[$bahanId] ?? 0) + $totalKebutuhanItem;
+                }
+            }
+            
+            // VALIDASI STOK
+            foreach ($totalBahanDibutuhkan as $bahanId => $kebutuhan) {
+                $bahan = BahanBaku::where('id', $bahanId)
+                    ->where('toko_id', $tokoId)
+                    ->first();
+                
+                if (!$bahan) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Bahan baku dengan ID {$bahanId} tidak ditemukan"
+                    ], 404);
+                }
+
+                if ($bahan->stok < $kebutuhan) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Stok bahan baku '{$bahan->nama_bahan}' tidak mencukupi. Dibutuhkan: {$kebutuhan}, Tersedia: {$bahan->stok}"
+                    ], 400);
+                }
+            }
+            
+            // PROSES TRANSAKSI
+            DB::beginTransaction();
+
+            try {
+                // BUAT TRANSAKSI (STATUS UNPAID)
+                $transaksi = Transaksi::create([
+                    'toko_id' => $tokoId,
+                    'kasir_id' => Auth::id(),
+                    'nama_pelanggan' => $customerName,
+                    'kode_transaksi' => $this->generateKodeTransaksi($tokoId),
+                    'total_harga' => $grandTotal,
+                    'status' => 'unpaid',
+                    'waktu_transaksi' => Carbon::now(),
+                ]);
+
+                // BUAT DETAIL TRANSAKSI DAN KURANGI STOK
+                foreach ($cartItems as $item) {
+                    // BUAT DETAIL TRANSAKSI
+                    DetailTransaksi::create([
+                        'transaksi_id' => $transaksi->id,
+                        'produk_id' => $item['produk_id'],
+                        'jumlah' => $item['quantity'],
+                        'subtotal' => $item['harga_satuan'] * $item['quantity'],
+                        'harga_satuan' => $item['harga_satuan'],
+                    ]);
+
+                    // KURANGI STOK BAHAN BAKU
+                    $produk = $produkDiKeranjang->get($item['produk_id']);
+                    
+                    if ($produk && $produk->resepProduks) {
+                        foreach ($produk->resepProduks as $resep) {
+                            if ($resep->bahan) {
+                                $bahan = $resep->bahan;
+                                $jumlahPerUnit = $resep->jumlah;
+                                $totalKebutuhanItem = $jumlahPerUnit * $item['quantity'];
+
+                                // UPDATE STOK
+                                $bahan->stok -= $totalKebutuhanItem;
+                                $bahan->save();
+
+                                \Log::info("Stok {$bahan->nama_bahan} dikurangi {$totalKebutuhanItem}, sisa: {$bahan->stok}");
+                            }
+                        }
+                    }
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Transaksi berhasil diproses.',
+                    'transaksi_id' => $transaksi->id
+                ], 200);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                \Log::error('Checkout Transaction Failed: ' . $e->getMessage());
+                \Log::error('Stack trace: ' . $e->getTraceAsString());
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat menyimpan transaksi: ' . $e->getMessage()
+                ], 500);
+            }
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Checkout Validation Failed: ' . json_encode($e->errors()));
+            
             return response()->json([
-                'success' => true,
-                'message' => 'Transaksi berhasil diproses.',
-                'transaksi_id' => $transaksi->id
-            ], 200);
+                'success' => false,
+                'message' => 'Data tidak valid',
+                'errors' => $e->errors()
+            ], 422);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            // Log error untuk debugging di server
-            \Log::error('Checkout Failed: ' . $e->getMessage()); 
+            \Log::error('Checkout Failed: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan server saat memproses transaksi. Transaksi dibatalkan.'
+                'message' => 'Terjadi kesalahan server: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    public function showStruk($id)
+    // TAMPILKAN HALAMAN PEMBAYARAN
+    public function pembayaran($id)
     {
-        $transaksi = Transaksi::with(['detailTransaksis.produk', 'kasir', 'toko'])
+        $transaksi = Transaksi::with('detailTransaksis.produk')
             ->findOrFail($id);
-            
-        // Pastikan transaksi milik toko user yang sedang login (keamanan)
+
+        // KEAMANAN: PASTIKAN MILIK TOKO
         if ($transaksi->toko_id !== Auth::user()->toko_id) {
             abort(403, 'Akses ditolak.');
         }
 
-        return view('pos.detailpesanan', compact('transaksi'));
+        // JIKA SUDAH DIBAYAR, REDIRECT KE STRUK
+        if ($transaksi->status === 'paid') {
+            return redirect()->route('pos.strukpesanan', $id)
+                ->with('info', 'Transaksi sudah dibayar.');
+        }
+
+        return view('pos.pembayaran', compact('transaksi'));
+    }
+
+    // PEMBAYARAN CASH
+    public function bayarCash(Request $request, $id)
+    {
+        $request->validate([
+            'uang_diterima' => 'required|numeric|min:0'
+        ]);
+
+        $transaksi = Transaksi::findOrFail($id);
+
+        // KEAMANAN
+        if ($transaksi->toko_id !== Auth::user()->toko_id) {
+            abort(403);
+        }
+
+        // CEK STATUS
+        if ($transaksi->status === 'paid') {
+            return back()->with('error', 'Transaksi sudah dibayar.');
+        }
+
+        $uangDiterima = (int) $request->input('uang_diterima');
+
+        // VALIDASI UANG CUKUP
+        if ($uangDiterima < $transaksi->total_harga) {
+            return back()->with('error', 'Uang yang diterima tidak mencukupi.');
+        }
+
+        $kembalian = $uangDiterima - $transaksi->total_harga;
+
+        // UPDATE STATUS TRANSAKSI
+        $transaksi->update([
+            'status' => 'paid',
+            'metode_pembayaran' => 'cash',
+            'uang_diterima' => $uangDiterima,
+            'kembalian' => $kembalian,
+        ]);
+
+        return redirect()->route('pos.strukpesanan', $transaksi->id)
+            ->with('success', 'Pembayaran tunai berhasil diproses.');
+    }
+
+    // PEMBAYARAN QRIS (STATIS)
+    public function bayarQris(Request $request, $id)
+    {
+        $transaksi = Transaksi::findOrFail($id);
+
+        // KEAMANAN
+        if ($transaksi->toko_id !== Auth::user()->toko_id) {
+            abort(403);
+        }
+
+        // CEK STATUS
+        if ($transaksi->status === 'paid') {
+            return back()->with('error', 'Transaksi sudah dibayar.');
+        }
+
+        // UPDATE STATUS TRANSAKSI
+        $transaksi->update([
+            'status' => 'paid',
+            'metode_pembayaran' => 'qris',
+            'uang_diterima' => $transaksi->total_harga,
+            'kembalian' => 0,
+        ]);
+
+        return redirect()->route('pos.strukpesanan', $transaksi->id)
+            ->with('success', 'Pembayaran QRIS berhasil dikonfirmasi.');
+    }
+
+    // TAMPILKAN STRUK    
+    public function showStruk($id)
+    {
+        $transaksi = Transaksi::with(['detailTransaksis.produk', 'kasir', 'toko'])
+            ->findOrFail($id);
+                    
+        if ($transaksi->toko_id !== Auth::user()->toko_id) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        return view('pos.strukpesanan', compact('transaksi'));
     }
 
     public function resep()
     {
         $tokoId = Auth::user()->toko_id;
 
-        // Ambil semua produk milik toko
         $semuaProduk = Produk::where('toko_id', $tokoId)->get();
 
-        // Ambil resep + relasinya
         $reseps = ResepProduk::with(['bahan', 'produk'])
             ->whereHas('produk', function ($q) use ($tokoId) {
                 $q->where('toko_id', $tokoId);
@@ -198,10 +340,8 @@ class POSController extends Controller
             'reseps' => $reseps,
             'produks' => $semuaProduk
         ]);
-
     }
 
-    // LIST BAHAN BAKU
     public function listBahan(Request $request)
     {
         $query = $request->input('query');
@@ -229,14 +369,13 @@ class POSController extends Controller
             ->orderBy('waktu_transaksi', 'desc')
             ->get(); 
 
-        $totalPenjualan = $transaksis->sum('total_harga'); 
+        $totalPenjualan = $transaksis->where('status', 'paid')->sum('total_harga'); 
 
         $transaksisPaginated = Transaksi::where('toko_id', Auth::user()->toko->id)
             ->whereDate('waktu_transaksi', $today) 
             ->with(['detailTransaksis', 'kasir'])
-            ->orderBy('waktu_transaksi', 'desc')
+            ->orderBy('waktu_transaksi', 'asc')
             ->paginate(15);
-
 
         return view('pos.transaksi', [
             'transaksis' => $transaksisPaginated, 
@@ -245,8 +384,43 @@ class POSController extends Controller
         ]);
     }
 
+    /**
+     * Generate kode transaksi unik
+     * Format: TRX-YYYYMMDD-XXXXX
+     * Contoh: TRX-20251211-00001
+     */
+    private function generateKodeTransaksi($tokoId)
+    {
+        $date = Carbon::now()->format('Ymd');
+        $prefix = "TRX-{$date}-";
+        
+        // CARI TRANSAKSI TERAKHIR HARI INI UNTUK TOKO INI
+        $lastTransaction = Transaksi::where('toko_id', $tokoId)
+            ->whereDate('created_at', Carbon::today())
+            ->orderBy('id', 'desc')
+            ->first();
+        
+        // GENERATE NOMOR URUT
+        if ($lastTransaction && strpos($lastTransaction->kode_transaksi, $prefix) === 0) {
+            // AMBIL NOMOR URUT TERAKHIR
+            $lastNumber = (int) substr($lastTransaction->kode_transaksi, -5);
+            $newNumber = $lastNumber + 1;
+        } else {
+            // MULAI DARI 1 JIKA BELUM ADA TRANSAKSI HARI INI
+            $newNumber = 1;
+        }
+        
+        // FORMAT DENGAN PADDING 5 DIGIT (00001, 00002, dst)
+        $kodeTransaksi = $prefix . str_pad($newNumber, 5, '0', STR_PAD_LEFT);
+        
+        // CEK APAKAH KODE SUDAH ADA (SAFETY CHECK)
+        $exists = Transaksi::where('kode_transaksi', $kodeTransaksi)->exists();
+        
+        if ($exists) {
+            // JIKA SUDAH ADA, GUNAKAN TIMESTAMP UNTUK MEMASTIKAN UNIQUE
+            $kodeTransaksi = $prefix . Carbon::now()->format('His') . '-' . rand(100, 999);
+        }
+        
+        return $kodeTransaksi;
+    }
 }
-
-
-
-   

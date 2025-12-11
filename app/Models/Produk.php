@@ -25,7 +25,7 @@ class Produk extends Model
     public function resepProduks()
     {
         // RELASI KE TABEL RESEP PRODUK -> MANY TO ONE LEWAT produk_id
-        return $this->hasMany(ResepProduk::class);
+        return $this->hasMany(ResepProduk::class, 'produk_id');
     }
 
     public function detailTransaksis()
@@ -36,28 +36,37 @@ class Produk extends Model
 
     public function isAvailable()
     {
-        // 1. Ambil semua resep yang dibutuhkan untuk produk ini
+        // AMBIL SEMUA RESEP YANG DIBUTUHKAN UNTUK PRODUK INI
         $resep = $this->resepProduks; 
 
-        // Jika tidak ada resep, asumsikan produk tidak bisa dijual/dibuat
+        // JIKA TIDAK ADA RESEP, ASUMSIKAN PRODUK TIDAK BISA DIJUAL/DIBUAT        
         if ($resep->isEmpty()) {
             return false; 
         }
 
-        foreach ($resep as $itemResep) {
-            // Kita mengakses BahanBaku melalui relasi 'bahan()' di ResepProduk
+        foreach ($resep as $itemResep) {            
             $stok_saat_ini = $itemResep->bahan->stok ?? 0;
-            // Jumlah yang dibutuhkan per 1 resep produk
+            // JUMLAH YANG DIBUTUHKAN PER 1 RESEP PRODUK
             $jumlah_dibutuhkan = $itemResep->jumlah; 
 
-            // Jika stok bahan baku kurang dari jumlah yang dibutuhkan resep, 
-            // maka produk tidak tersedia.
+            // JIKA STOK BAHAN BAKU KURANG DARI JUMLAH YANG DIBUTUHKAN RESEP
+            // MAKA PRODUK TIDAK TERSEDIA
             if ($stok_saat_ini < $jumlah_dibutuhkan) {
                 return false; 
             }
         }
 
-        // Jika semua bahan baku memiliki stok yang mencukupi, maka tersedia
+        // JIKA SEMUA BAHAN BAKU MEMILIKIS STOK YANG MENCUKUPI, MAKA TERSEDIA        
         return true;
+    }
+
+    public function bahan()
+    {
+        return $this->belongsTo(BahanBaku::class, 'bahan_id');
+    }
+
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class, 'produk_id');
     }
 }

@@ -33,11 +33,14 @@
             <h2 class="text-xl font-bold text-primary mb-3">Point of Sale</h2>
             <p class="text-gray-700 font-medium mb-5">Ayo buka toko dan kelola pesanan sekarang.</p>
 
-            {{-- TOMBOL LIHAT POS --}}
-            <a href="{{ route('pos.menupesanan') }}"
-               class="inline-block font-semibold bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg transition">
-               Opening
-            </a>
+            {{-- TOMBOL LIHAT POS/OPENING --}}
+            <form action="{{ route('kasir.opening') }}" method="POST">
+                @csrf
+                <button type="submit"
+                    class="inline-block font-semibold bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg transition">
+                    Opening
+                </button>
+            </form>
         </div>
     </div>
 
