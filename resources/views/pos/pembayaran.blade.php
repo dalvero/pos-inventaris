@@ -40,7 +40,7 @@
                 {{-- ITEMS --}}
                 <div class="border-t pt-4 max-h-64 overflow-y-auto">
                     @foreach($transaksi->detailTransaksis as $detail)
-                    <div class="flex justify-between items-start mb-3 pb-3 border-b">
+                    <div class="flex justify-between items-start mb-3 pb-3">
                         <div class="flex-1">
                             <p class="font-medium text-gray-800">{{ $detail->produk->nama_produk }}</p>
                             <p class="text-xs text-gray-500">{{ $detail->jumlah }} × Rp {{ number_format($detail->harga_satuan, 0, ',', '.') }}</p>

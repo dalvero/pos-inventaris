@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- HERO SECTION -->
-<div class="relative overflow-hidden bg-linear-to-br from-primary via-primary to-primary/90 text-white -mt-4 -mx-6">
+<div class="relative overflow-hidden bg-linear-to-br from-primary via-primary to-primary/90 text-white -mt-6 -mx-6">
     <div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
     <div class="container mx-auto px-6 py-16 relative z-10">
         <div class="max-w-4xl mx-auto text-center">

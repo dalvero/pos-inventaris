@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Toko;
 use App\Models\Shift;
+use App\Models\Transaksi;
+use App\Models\DetailTransaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -20,12 +22,106 @@ class TokoController extends Controller
     {
         $tokoId = Auth::user()->toko_id;
 
+        // KASIR YANG SEDANG AKTIF (SHIFT OPENING)
         $kasirAktif = Shift::where('toko_id', $tokoId)
             ->whereNull('closing')
             ->with('kasir')
             ->get();
 
-        return view('toko.dashboard', compact('kasirAktif'));
+        // STATISTIK PENJUALAN HARI INI
+        $hariIni = now()->format('Y-m-d');
+        $kemarin = now()->subDay()->format('Y-m-d');
+
+        // TOTAL PENJUALAN HARI INI
+        $penjualanHariIni = Transaksi::where('toko_id', $tokoId)
+            ->whereDate('waktu_transaksi', $hariIni)
+            ->where('status', 'paid')
+            ->sum('total_harga');
+
+        // TOTAL PENJUALAN KEMARIN
+        $penjualanKemarin = Transaksi::where('toko_id', $tokoId)
+            ->whereDate('waktu_transaksi', $kemarin)
+            ->where('status', 'paid')
+            ->sum('total_harga');
+
+        // HITUNG PRESENTASE PERUBAHAN
+        $persentasePerubahan = 0;
+        $statusPerubahan = 'netral'; // NETRAL, NAIK, TURUN, NO_DATA
+
+        if ($penjualanKemarin > 0) {
+            $persentasePerubahan = (($penjualanHariIni - $penjualanKemarin) / $penjualanKemarin) * 100;
+            
+            if ($persentasePerubahan > 0) {
+                $statusPerubahan = 'naik';
+            } elseif ($persentasePerubahan < 0) {
+                $statusPerubahan = 'turun';
+            } else {
+                $statusPerubahan = 'netral';
+            }
+        } elseif ($penjualanHariIni > 0) {
+            // JIKA KEMARIN TIDAK ADA DATA TAPI HARI INI ADA
+            $statusPerubahan = 'no_data';
+        }
+
+        // JUMLAH TRANSAKSI HARI INI
+        $jumlahTransaksiHariIni = Transaksi::where('toko_id', $tokoId)
+            ->whereDate('waktu_transaksi', $hariIni)
+            ->where('status', 'paid')
+            ->count();
+
+        // PRODUK TERLARIS (TOP 10)
+        // AMBIL DARI DETAIL TRANSAKSI YANG DIGROUP BY produk_id
+        $produkTerlaris = \DB::table('detail_transaksis')
+            ->join('transaksis', 'detail_transaksis.transaksi_id', '=', 'transaksis.id')
+            ->join('produks', 'detail_transaksis.produk_id', '=', 'produks.id')
+            ->where('transaksis.toko_id', $tokoId)
+            ->whereDate('transaksis.waktu_transaksi', $hariIni)
+            ->where('transaksis.status', 'paid')
+            ->select(
+                'produks.id',
+                'produks.nama_produk',
+                'produks.harga',
+                \DB::raw('SUM(detail_transaksis.jumlah) as total_terjual'),
+                \DB::raw('SUM(detail_transaksis.subtotal) as total_pendapatan')
+            )
+            ->groupBy('produks.id', 'produks.nama_produk', 'produks.harga')
+            ->orderBy('total_terjual', 'desc')
+            ->limit(10)
+            ->get();
+
+        // PRODUK TERLARIS BULAN INI (TOP 10)
+        $bulanIni = now()->format('Y-m');
+
+        $produkTerlarisBulan = \DB::table('detail_transaksis')
+            ->join('transaksis', 'detail_transaksis.transaksi_id', '=', 'transaksis.id')
+            ->join('produks', 'detail_transaksis.produk_id', '=', 'produks.id')
+            ->where('transaksis.toko_id', $tokoId)
+            ->whereYear('transaksis.waktu_transaksi', now()->year)
+            ->whereMonth('transaksis.waktu_transaksi', now()->month)
+            ->where('transaksis.status', 'paid')
+            ->select(
+                'produks.id',
+                'produks.nama_produk',
+                'produks.harga',
+                \DB::raw('SUM(detail_transaksis.jumlah) as total_terjual'),
+                \DB::raw('SUM(detail_transaksis.subtotal) as total_pendapatan')
+            )
+            ->groupBy('produks.id', 'produks.nama_produk', 'produks.harga')
+            ->orderBy('total_terjual', 'desc')
+            ->limit(10)
+            ->get();
+
+        // UPDATE RETURN VIEW UNTUK MENAMBAHKAN $produkTerlarisBulan
+        return view('toko.dashboard', compact(
+            'kasirAktif',
+            'penjualanHariIni',
+            'penjualanKemarin',
+            'persentasePerubahan',
+            'statusPerubahan',
+            'jumlahTransaksiHariIni',
+            'produkTerlaris',
+            'produkTerlarisBulan' 
+        ));
         
     }
 
@@ -117,5 +213,37 @@ class TokoController extends Controller
 
         return redirect()->route('toko.dashboard')
             ->with('success', 'Data toko berhasil diperbarui!');
+    }
+
+    // TRANSAKSI TOKO    
+    public function transaksiPenjualan(Request $request)
+    {
+        $tokoId = Auth::user()->toko_id;
+        
+        // AMBIL TANGGAL DARI REQUEST, DEFAULT KE HARI INI
+        $tanggal = $request->input('tanggal', now()->format('Y-m-d'));
+        
+        // QUERY TRANSAKSI BERDASARKAN TANGGAL YANG DIPILIH
+        $query = Transaksi::where('toko_id', $tokoId)
+            ->whereDate('waktu_transaksi', $tanggal)
+            ->with(['detailTransaksis.produk', 'kasir'])
+            ->orderBy('waktu_transaksi', 'desc');
+        
+        // PAGINATE TRANSAKSI (10 ITEM PER TRANSAKSI, BUKAN PER ITEM)
+        $transaksis = $query->paginate(10)->appends(['tanggal' => $tanggal]);
+        
+        // HITUNG TOTAL PENJUALAN PADA TANGGAL TERSEBUT
+        $totalPenjualan = Transaksi::where('toko_id', $tokoId)
+            ->whereDate('waktu_transaksi', $tanggal)
+            ->where('status', 'paid')
+            ->sum('total_harga');
+        
+        // AMBIL SEMUA TRANSAKSI UNTUK DATA JS (JIKA DIPERLUKAN)
+        $allTransaksis = Transaksi::where('toko_id', $tokoId)
+            ->whereDate('waktu_transaksi', $tanggal)
+            ->with(['detailTransaksis.produk'])
+            ->get();
+        
+        return view('toko.transaksi', compact('transaksis', 'totalPenjualan', 'tanggal', 'allTransaksis'));
     }
 }

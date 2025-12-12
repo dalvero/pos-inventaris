@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'POS & Inventory')</title>
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     @vite('resources/css/app.css')
 
     {{-- TOAST NOTIFICATION --}}
@@ -11,8 +12,14 @@
 </head>
 <body class="bg-background font-sans text-muted">
 
-    <nav class="bg-primary text-white px-6 py-4 shadow-card flex justify-between items-center">
-        <a href="{{ route('home') }}" class="font-bold text-xl">POS-Inventaris</a>
+    <nav class="bg-primary mb-5 text-white px-6 py-4 shadow-card flex justify-between items-center">
+        <a href="{{ route('home') }}" class="flex items-center gap-3 font-bold text-xl">
+            <img src="{{ asset('images/logo.png') }}" 
+                alt="Logo" 
+                class="w-10 h-10 rounded-full object-cover shadow-sm">
+            POS - Inventaris
+        </a>
+
         <div class="space-x-4">
             <a href="{{ route('home') }}" class="hover:text-accent font-semibold">Home</a>
             <a href="{{ route('about') }}" class="hover:text-accent font-semibold">About</a>

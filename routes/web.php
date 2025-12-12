@@ -11,6 +11,7 @@ use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\ResepProdukController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\SuperAdminController;
 
 // LANDING PAGE
 Route::get('/', [HomeController::class,'index'])->name('home');
@@ -31,18 +32,39 @@ Route::middleware('auth')->group(function () {
     // Dashboard umum
     Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
 
+    // SUPER ADMIN
+    Route::middleware('role:super_admin')->group(function () {
+        Route::get('/super_admin/dashboard', [SuperAdminController::class, 'dashboard'])->name('super_admin.dashboard');
+        
+        // KELOLA USER
+        Route::get('/super_admin/users', [SuperAdminController::class, 'indexUsers'])->name('super_admin.users.index');
+        Route::get('/super_admin/users/create', [SuperAdminController::class, 'createUser'])->name('super_admin.users.create');
+        Route::post('/super_admin/users', [SuperAdminController::class, 'storeUser'])->name('super_admin.users.store');
+        Route::get('/super_admin/users/{id}/edit', [SuperAdminController::class, 'editUser'])->name('super_admin.users.edit');
+        Route::put('/super_admin/users/{id}', [SuperAdminController::class, 'updateUser'])->name('super_admin.users.update');
+        Route::delete('/super_admin/users/{id}', [SuperAdminController::class, 'destroyUser'])->name('super_admin.users.destroy');
+        
+        // KELOLA TOKO
+        Route::get('/super_admin/tokos', [SuperAdminController::class, 'indexTokos'])->name('super_admin.tokos.index');
+        Route::get('/super_admin/tokos/create', [SuperAdminController::class, 'createToko'])->name('super_admin.tokos.create');
+        Route::post('/super_admin/tokos', [SuperAdminController::class, 'storeToko'])->name('super_admin.tokos.store');
+        Route::get('/super_admin/tokos/{id}/edit', [SuperAdminController::class, 'editToko'])->name('super_admin.tokos.edit');
+        Route::put('/super_admin/tokos/{id}', [SuperAdminController::class, 'updateToko'])->name('super_admin.tokos.update');
+        Route::delete('/super_admin/tokos/{id}', [SuperAdminController::class, 'destroyToko'])->name('super_admin.tokos.destroy');
+    });
+
     // ADMIN TOKO
     Route::middleware('role:admin_toko')->group(function () {
+        // TOKO
         Route::get('/toko/dashboard', [TokoController::class, 'dashboard'])->name('toko.dashboard');
         Route::get('/toko/kasir', [TokoController::class, 'listKasir'])->name('toko.kasir');
         Route::get('/toko/create', [TokoController::class,'create'])->name('toko.create');
         Route::post('/toko/store', [TokoController::class,'store'])->name('toko.store');
         Route::get('/toko/{id}/edit', [TokoController::class,'edit'])->name('toko.edit');
         Route::put('/toko/{id}', [TokoController::class,'update'])->name('toko.update');
-    });
+        Route::get('/toko/transaksi', [TokoController::class, 'transaksiPenjualan']) -> name('toko.transaksi');
 
-    // ADMIN TOKO DAN SUPER ADMIN
-    Route::middleware('role:admin_toko,super_admin')->group(function () {
+        // KASIR
         Route::get('/kasir/dashboard', [KasirController::class, 'dashboard'])->name('kasir.dashboard');
         Route::get('/kasir/kasir', [KasirController::class, 'listKasir'])->name('kasir.kasir');        
         Route::get('/kasir/{id}', [KasirController::class, 'show'])->name('kasir.show');    
@@ -75,8 +97,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/bahanbaku/{id}', [BahanBakuController::class, 'destroy'])->name('bahanbaku.destroy');
     });
 
-    // KASIR DAN SUPERADMIN
-    Route::middleware('role:kasir,super_admin')->group(function () {        
+    // KASIR
+    Route::middleware('role:kasir')->group(function () {        
         Route::post('/kasir/opening', [ShiftController::class, 'opening'])->name('kasir.opening');
         Route::post('/kasir/closing', [ShiftController::class, 'closing'])->name('kasir.closing');
         
