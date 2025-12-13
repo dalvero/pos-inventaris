@@ -67,7 +67,7 @@
             <input type="password" name="password" placeholder="Password" class="w-full p-3 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
             {{-- REMEMBER ME & LUPA PASSWORD --}}
             <div class="flex items-center justify-end mb-6">
-                <a href="#" class="text-md mr-2 text-primary hover:text-primary-hover font-semibold">Lupa Password?</a>
+                <a href="{{ route('password.request')}}" class="text-md mr-2 text-primary hover:text-primary-hover font-semibold">Lupa Password?</a>
             </div>
             <button type="submit" class="w-full bg-primary text-2xl font-semibold cursor-pointer hover:bg-primary-hover text-white px-4 py-3 rounded-md">Login</button>
             {{-- BELUM PUNYA AKUN? REGISTER --}}

@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -111,5 +116,103 @@ class AuthController extends Controller
 
         // REDIRECT KE DASHBOARD DENGAN PESAN SUKSES
         return redirect()->route('dashboard')->with('success','Akun berhasil dibuat!'); 
+    }
+
+    // LUPA PASSWORD
+    public function showForgotPassword()
+    {
+        return view('auth.forgot-password');
+    }
+
+    // KIRIM RESET LINK    
+    public function sendResetLink(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = DB::table('users')->where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['email' => 'Email tidak terdaftar']);
+        }
+
+        // HAPUS TOKEN LAMA JIKA ADA
+        DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->delete();
+
+        // GENERATE TOKE BARU
+        $token = Str::random(60);
+
+        // SIMPAN TOKEN KE DATABASE
+        DB::table('password_reset_tokens')->insert([
+            'email' => $request->email,
+            'token' => $token,
+            'created_at' => Carbon::now()
+        ]);
+
+        // BUAT RESET LINK
+        $resetLink = url('/reset-password/' . $token . '?email=' . urlencode($request->email));
+
+        // DATA UNTUK EMAIL
+        $emailData = [
+            'userName' => $user->name ?? 'Pengguna',
+            'resetLink' => $resetLink
+        ];
+
+        // KIRIM EMAIL DENGAN TEMPLATE BLADE
+        Mail::send('emails.reset-password', $emailData, function ($message) use ($request) {
+            $message->to($request->email)
+                    ->subject('Reset Password - POS & Inventory');
+        });
+
+        return back()->with('status', 'Tautan reset kata sandi telah dikirim ke email Anda');
+    }
+
+    // FORM RESET PASSWORD
+    public function showResetPassword(Request $request, $token)
+    {
+        return response()
+            ->view('auth.reset-password', [
+                'token' => $token,
+                'email' => $request->email
+            ])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+    }
+
+
+    // PROSES RESET PASSWORD
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|confirmed|min:6',
+            'token' => 'required'
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->token)
+            ->where('created_at', '>=', Carbon::now()->subMinutes(60))
+            ->first();
+
+        if (!$record) {
+            return back()->with('error', 'Token tidak valid');
+        }
+
+        DB::table('users')
+            ->where('email', $request->email)
+            ->update([
+                'password' => Hash::make($request->password)
+            ]);
+
+        DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->delete();
+
+        return redirect('/login')->with('success', 'Password berhasil direset');
     }
 }

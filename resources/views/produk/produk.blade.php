@@ -97,7 +97,7 @@
                     <div class="flex gap-2 mt-2">
                         {{-- BUTTON DETAIL --}}
                         <button
-                            onclick="editProduk({{ $produk->id }}, '{{ $produk->nama_produk }}', {{ $produk->harga }}, '{{ $produk->foto ? asset('storage/'.$produk->foto) : '' }}')"
+                            onclick="detailProduk({{ $produk->id }}, '{{ $produk->nama_produk }}', {{ $produk->harga }}, '{{ $produk->foto ? asset('storage/'.$produk->foto) : '' }}')"
                             class="flex-1 text-xs font-semibold cursor-pointer text-emerald-600 hover:bg-emerald-50 py-2 rounded-lg">
                             Detail
                         </button>
@@ -193,6 +193,48 @@
     </div>
 </div>
 
+{{-- MODAL DETAIL PRODUK --}}
+<div id="detailModal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm">
+    
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 relative mx-4">
+
+        <h2 class="text-xl font-bold mb-4 text-gray-800">Detail Produk</h2>
+
+        {{-- FOTO PRODUK --}}
+        <div id="detailFotoContainer" class="mb-4">
+            <label class="block text-sm font-semibold mb-2 text-gray-700">Foto Produk</label>
+            <div class="flex justify-center">
+                <img id="detailFoto" src="" alt="Foto Produk" class="w-full h-64 object-cover rounded-lg border-2 border-gray-200">
+            </div>
+        </div>
+
+        {{-- NAMA PRODUK --}}
+        <div class="mb-4">
+            <label class="block text-sm font-semibold mb-2 text-gray-700">Nama Produk</label>
+            <div class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-700">
+                <span id="detailNama"></span>
+            </div>
+        </div>
+
+        {{-- HARGA --}}
+        <div class="mb-4">
+            <label class="block text-sm font-semibold mb-2 text-gray-700">Harga</label>
+            <div class="w-full border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 text-gray-700">
+                <span id="detailHarga"></span>
+            </div>
+        </div>
+
+        {{-- BUTTON --}}
+        <div class="flex justify-end gap-3 mt-6">
+            <button type="button" onclick="closeDetailModal()"
+                    class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
 {{-- SCRIPT MODAL --}}
 <script>
     // PREVIEW FOTO SAAT UPLOAD
@@ -271,7 +313,7 @@
         }
     });
 
-    // TRIGGER EDIT PRODUK\
+    // TRIGGER EDIT PRODUK
     function editProduk(id, nama, harga, foto) {
         openProdukModal("edit", {
             id: id,
@@ -280,6 +322,46 @@
             foto: foto
         });
     }
+
+    // FUNCTION OPEN DETAIL MODAL
+    function detailProduk(id, nama, harga, foto) {
+        const modal = document.getElementById('detailModal');
+        const detailFoto = document.getElementById('detailFoto');
+        const detailFotoContainer = document.getElementById('detailFotoContainer');
+        const detailNama = document.getElementById('detailNama');
+        const detailHarga = document.getElementById('detailHarga');
+
+        // TAMPILKAN MODAL
+        modal.classList.remove("hidden");
+        modal.style.display = "flex";
+
+        // ISI DATA
+        detailNama.textContent = nama;
+        detailHarga.textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga);
+        
+        // TAMPILKAN FOTO JIKA ADA
+        if (foto) {
+            detailFoto.src = foto;
+            detailFotoContainer.classList.remove('hidden');
+        } else {
+            detailFoto.src = "{{ asset('storage/img/no_image.jpg') }}";
+            detailFotoContainer.classList.remove('hidden');
+        }
+    }
+
+    // FUNCTION CLOSE DETAIL MODAL
+    function closeDetailModal() {
+        const modal = document.getElementById('detailModal');
+        modal.classList.add("hidden");
+        modal.style.display = "none";
+    }
+
+    // TUTUP DETAIL MODAL SAAT KLIK DILUAR
+    document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDetailModal();
+        }
+    });
 </script>
 
 {{-- SCRIPT SWEET ALERT KONFIRMASI HAPUS --}}
