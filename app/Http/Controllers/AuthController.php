@@ -22,21 +22,46 @@ class AuthController extends Controller
     }
 
     // PROSES LOGIN
+    // public function login(Request $request)
+    // {
+    //     // VALIDASI INPUT
+    //     $credentials = $request->only('email','password');
+
+    //     // CEK KREDENSIAL DAN LOGIN
+    //     if(Auth::attempt($credentials)){
+    //         $request->session()->regenerate();
+
+    //         // JIKA BERHASIL LOGIN, MENAMPILKAN PESAN LOGIN BERHASIL
+    //         return redirect()->route('dashboard')->with('success','Login berhasil!');
+    //     }
+
+    //     // JIKA GAGAL KEMBALI KE HALAMAN LOGIN DENGAN ERROR
+    //     return back()->withErrors(['email'=>'Email atau password salah']);
+    // }
+
     public function login(Request $request)
     {
-        // VALIDASI INPUT
-        $credentials = $request->only('email','password');
+        // 1. VALIDASI (WAJIB)
+        $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-        // CEK KREDENSIAL DAN LOGIN
-        if(Auth::attempt($credentials)){
+        // 2. ATTEMPT LOGIN
+        if (Auth::attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();
 
-            // JIKA BERHASIL LOGIN, MENAMPILKAN PESAN LOGIN BERHASIL
-            return redirect()->route('dashboard')->with('success','Login berhasil!');
+            return redirect()
+                ->route('dashboard')
+                ->with('success', 'Login berhasil!');
         }
 
-        // JIKA GAGAL KEMBALI KE HALAMAN LOGIN DENGAN ERROR
-        return back()->withErrors(['email'=>'Email atau password salah']);
+        // 3. GAGAL LOGIN (AMAN UNTUK SESSION & TOAST)
+        return back()
+            ->withInput($request->only('email'))
+            ->withErrors([
+                'email' => 'Email atau password salah',
+            ]);
     }
 
     // LOGOUT
